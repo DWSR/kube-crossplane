@@ -1,0 +1,24 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: crossplane
+  namespace: crossplane-system
+spec:
+  minAvailable: 0
+  selector:
+    matchLabels:
+      crossplane.io/component: controller
+  unhealthyPodEvictionPolicy: IfHealthyBudget
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: crossplane-rbac-manager
+  namespace: crossplane-system
+spec:
+  minAvailable: 0
+  selector:
+    matchLabels:
+      crossplane.io/component: rbac-manager
+  unhealthyPodEvictionPolicy: IfHealthyBudget
+...

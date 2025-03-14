@@ -1,0 +1,8 @@
+[tools]
+go = "1.24.0"
+golangci-lint = "1.64.6"
+helm = "3.17.1"
+vendir = "latest"
+ctlptl = "latest"
+kustomize = "latest"
+pre-commit = "latest"

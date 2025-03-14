@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+labels:
+  - pairs:
+      app.kubernetes.io/name: "crossplane"
+      app.kubernetes.io/instance: "crossplane"
+    includeSelectors: true
+
+resources:
+  - pdb.yaml

@@ -1,0 +1,120 @@
+apiVersion: vendir.k14s.io/v1alpha1
+kind: Config
+directories:
+  - path: upstream
+    contents:
+      - path: 1.19.0/charts/crossplane
+        helmChart:
+          name: crossplane
+          version: "1.19.0"
+          repository:
+            url: https://charts.crossplane.io/stable
+      - path: 1.19.0/base
+        inline:
+          paths:
+            restricted-deployment.yaml: |
+              apiVersion: pkg.crossplane.io/v1beta1
+              kind: DeploymentRuntimeConfig
+              metadata:
+                name: restricted-deployment
+              spec:
+                deploymentTemplate:
+                  spec:
+                    selector: {}
+                    template:
+                      spec:
+                        containers:
+                          - name: package-runtime
+                            resources:
+                              requests:
+                                cpu: 100m
+                                memory: 256Mi
+                              limits:
+                                memory: 256Mi
+                            securityContext:
+                              runAsNonRoot: true
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                        securityContext:
+                          seccompProfile:
+                            type: "RuntimeDefault"
+            namespace.yaml: |
+              apiVersion: v1
+              kind: Namespace
+              metadata:
+                name: crossplane-system
+                labels:
+                  pod-security.kubernetes.io/audit: restricted
+                  pod-security.kubernetes.io/enforce: restricted
+            kustomization.yaml: |
+              apiVersion: kustomize.config.k8s.io/v1beta1
+              kind: Kustomization
+              namespace: crossplane-system
+
+              resources:
+                - namespace.yaml
+
+              helmGlobals:
+                chartHome: ../charts
+
+              helmCharts:
+                - repo: https://charts.crossplane.io/stable
+                  name: crossplane
+                  releaseName: crossplane
+                  namespace: crossplane-system
+                  valuesInline:
+                    revisionHistoryLimit: 2
+                    resourcesCrossplane:
+                      limits:
+                        memory: 512Mi
+                      requests:
+                        memory: 512Mi
+                        cpu: 100m
+                    podSecurityContextCrossplane:
+                      runAsNonRoot: true
+                      seccompProfile:
+                        type: RuntimeDefault
+                    resourcesRBACManager:
+                      limits:
+                        memory: 128Mi
+                      requests:
+                        cpu: 50m
+                        memory: 128Mi
+                    podSecurityContextRBACManager:
+                      runAsNonRoot: true
+                      seccompProfile:
+                        type: RuntimeDefault
+                    metrics:
+                      enabled: true
+
+              patches:
+                - target:
+                    kind: Deployment
+                  patch: |-
+                    - op: remove
+                      path: /spec/template/spec/containers/0/resources/limits/cpu
+                    - op: add
+                      path: /spec/template/spec/containers/0/securityContext/capabilities
+                      value:
+                        drop: ["ALL"]
+                    - op: remove
+                      path: /spec/template/spec/initContainers/0/resources/limits/cpu
+                    - op: add
+                      path: /spec/template/spec/initContainers/0/securityContext/capabilities
+                      value:
+                        drop: ["ALL"]
+                - target:
+                    kind: Deployment
+                    name: crossplane
+                  patch: |-
+                    - op: add
+                      path: /spec/template/metadata/labels/crossplane.io~1component
+                      value: controller
+                - target:
+                    kind: Deployment
+                    name: crossplane-rbac-manager
+                  patch: |-
+                    - op: add
+                      path: /spec/template/metadata/labels/crossplane.io~1component
+                      value: rbac-manager
