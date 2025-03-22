@@ -40,7 +40,12 @@ jobs:
     uses: DWSR/actions/.github/workflows/autoapprove-dependabot.yml@main
 
   render-kube-app:
-    name: Render Kubernetes manifests
+    name: Render Kubernetes manifests - ${{ matrix.path }}
     uses: DWSR/actions/.github/workflows/render-kube-app.yml@add-render-kube-app
+    strategy:
+      matrix:
+        include:
+          - path: overlays/live
+          - path: overlays/test
     with:
-      path: overlays/live
+      path: "${{ matrix.path }}"
