@@ -6,7 +6,7 @@ on:
 
 permissions:
   actions: read
-  packages: read
+  packages: write
   contents: write
   security-events: write
   pull-requests: write
@@ -36,3 +36,17 @@ jobs:
     name: Tests
     uses: DWSR/actions/.github/workflows/go-test-single.yml@main
     if: github.event_name != 'schedule'
+
+  render-kube-app:
+    name: Render Kubernetes manifests - ${{ matrix.path }}
+    uses: DWSR/actions/.github/workflows/render-kube-app.yml@add-render-kube-app
+    strategy:
+      matrix:
+        include:
+          - path: overlays/live
+            create-bundle: true
+          - path: overlays/test
+            create-bundle: false
+    with:
+      path: "${{ matrix.path }}"
+      create-bundle: "${{ matrix.create-bundle }}"

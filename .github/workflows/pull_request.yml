@@ -46,9 +46,6 @@ jobs:
       matrix:
         include:
           - path: overlays/live
-            create-bundle: true
           - path: overlays/test
-            create-bundle: false
     with:
       path: "${{ matrix.path }}"
-      create-bundle: "${{ matrix.create-bundle }}"
