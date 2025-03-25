@@ -6,7 +6,7 @@ on:
 
 permissions:
   actions: read
-  packages: read
+  packages: write
   contents: write
   security-events: write
   pull-requests: write
