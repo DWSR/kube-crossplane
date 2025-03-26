@@ -42,14 +42,11 @@ jobs:
 
   render-kube-app:
     name: Render Kubernetes manifests - ${{ matrix.path }}
-    uses: DWSR/actions/.github/workflows/render-kube-app.yml@add-render-kube-app
+    uses: DWSR/actions/.github/workflows/render-kube-app.yml@main
     strategy:
       matrix:
         include:
           - path: overlays/live
-            create-bundle: true
           - path: overlays/test
-            create-bundle: false
     with:
       path: "${{ matrix.path }}"
-      create-bundle: "${{ matrix.create-bundle }}"

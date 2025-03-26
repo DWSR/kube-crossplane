@@ -6,7 +6,7 @@ on:
 
 permissions:
   actions: read
-  packages: write
+  packages: read
   contents: write
   security-events: write
   pull-requests: write
@@ -39,7 +39,7 @@ jobs:
 
   render-kube-app:
     name: Render Kubernetes manifests - ${{ matrix.path }}
-    uses: DWSR/actions/.github/workflows/render-kube-app.yml@add-render-kube-app
+    uses: DWSR/actions/.github/workflows/render-kube-app.yml@main
     strategy:
       matrix:
         include:
@@ -49,4 +49,4 @@ jobs:
             create-bundle: false
     with:
       path: "${{ matrix.path }}"
-      create-bundle: "${{ matrix.create-bundle }}"
+      create-bundle "${{ matrix.create-bundle }}"
