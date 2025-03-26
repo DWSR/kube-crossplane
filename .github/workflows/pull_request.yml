@@ -6,6 +6,7 @@ on:
 
 permissions:
   actions: read
+  id-token: write
   packages: write
   contents: write
   security-events: write
