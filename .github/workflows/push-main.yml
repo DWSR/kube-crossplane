@@ -49,4 +49,4 @@ jobs:
             create-bundle: false
     with:
       path: "${{ matrix.path }}"
-      create-bundle "${{ matrix.create-bundle }}"
+      create-bundle: "${{ matrix.create-bundle }}"
