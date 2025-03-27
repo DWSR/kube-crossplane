@@ -40,13 +40,14 @@ jobs:
     name: Auto-approve Dependabot PRs
     uses: DWSR/actions/.github/workflows/autoapprove-dependabot.yml@main
 
-  render-kube-app:
-    name: Render Kubernetes manifests - ${{ matrix.path }}
+  render-live:
+    name: Render Kubernetes manifests - live
     uses: DWSR/actions/.github/workflows/render-kube-app.yml@main
-    strategy:
-      matrix:
-        include:
-          - path: overlays/live
-          - path: overlays/test
     with:
-      path: "${{ matrix.path }}"
+      path: overlays/live
+
+  render-test:
+    name: Render Kubernetes manifests - test
+    uses: DWSR/actions/.github/workflows/render-kube-app.yml@main
+    with:
+      path: overlays/test
