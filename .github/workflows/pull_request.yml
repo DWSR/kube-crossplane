@@ -6,7 +6,8 @@ on:
 
 permissions:
   actions: read
-  packages: read
+  id-token: write
+  packages: write
   contents: write
   security-events: write
   pull-requests: write
@@ -30,14 +31,22 @@ jobs:
   golangci-lint:
     name: golangci-lint
     uses: DWSR/actions/.github/workflows/golangci-lint.yml@main
-    if: github.event_name != 'schedule'
 
   tests:
     name: Tests
     uses: DWSR/actions/.github/workflows/go-test-single.yml@main
-    if: github.event_name != 'schedule'
 
   autoapprove-dependabot:
     name: Auto-approve Dependabot PRs
     uses: DWSR/actions/.github/workflows/autoapprove-dependabot.yml@main
-    if: github.event_name != 'schedule'
+
+  render-kube-app:
+    name: Render Kubernetes manifests - ${{ matrix.path }}
+    uses: DWSR/actions/.github/workflows/render-kube-app.yml@main
+    strategy:
+      matrix:
+        include:
+          - path: overlays/live
+          - path: overlays/test
+    with:
+      path: "${{ matrix.path }}"
