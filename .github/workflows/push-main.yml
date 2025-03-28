@@ -61,6 +61,8 @@ jobs:
         with:
           app-id: "${{ secrets.INFRA_BOT_APP_ID }}"
           private-key: "${{ secrets.INFRA_BOT_PRIVATE_KEY }}"
+          owner: DWSR
+          repositories: infra
       - name: Dispatch workflow
         run: |
           gh workflow run \
