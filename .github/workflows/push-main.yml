@@ -31,23 +31,43 @@ jobs:
   golangci-lint:
     name: golangci-lint
     uses: DWSR/actions/.github/workflows/golangci-lint.yml@main
-    if: github.event_name != 'schedule'
 
   tests:
     name: Tests
     uses: DWSR/actions/.github/workflows/go-test-single.yml@main
-    if: github.event_name != 'schedule'
 
-  render-kube-app:
-    name: Render Kubernetes manifests - ${{ matrix.path }}
+  render-live:
+    name: Render Kubernetes manifests - live
     uses: DWSR/actions/.github/workflows/render-kube-app.yml@main
-    strategy:
-      matrix:
-        include:
-          - path: overlays/live
-            create-bundle: true
-          - path: overlays/test
-            create-bundle: false
+    needs: [tests]
     with:
-      path: "${{ matrix.path }}"
-      create-bundle: "${{ matrix.create-bundle }}"
+      path: overlays/live
+      create-bundle: true
+
+  render-test:
+    name: Render Kubernetes manifests - test
+    uses: DWSR/actions/.github/workflows/render-kube-app.yml@main
+    with:
+      path: overlays/test
+
+  update-infra-repo:
+    name: Update Infra Repo
+    runs-on: ubuntu-latest
+    needs: [render-live]
+    steps:
+      - name: Get infra bot app token
+        id: app-token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
+        with:
+          app-id: "${{ secrets.INFRA_BOT_APP_ID }}"
+          private-key: "${{ secrets.INFRA_BOT_PRIVATE_KEY }}"
+      - name: Dispatch workflow
+        run: |
+          gh workflow run \
+            'Update Kubernetes App' \
+            --repo DWSR/infra \
+            --field 'ref=${{ github.ref }}' \
+            --field 'bundle-with-digest=${{ needs.render-live.outputs.bundle-with-digest }}' \
+            --field 'repo-name=${{ github.repository }}'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
